@@ -1,0 +1,79 @@
+version: '3.4'
+
+services:
+  pg-master:
+    build:
+      context: .
+      dockerfile: Dockerfile-pg
+    image: danieldent/postgres-replication
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /var/lib/postgresql/data
+    ports:
+      - 7432:5432
+    expose:
+      - 5432
+
+  pg-slave:
+    build:
+      context: .
+      dockerfile: Dockerfile-pg
+    image: danieldent/postgres-replication
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+      REPLICATE_FROM: pg-master
+    volumes:
+      - /var/lib/postgresql/data
+    ports:
+      - 7433:5432 
+    expose:
+      - 5432
+    links:
+      - pg-master
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+    - REDIS_HOSTS=local:redis:6379
+    ports:
+    - "8081:8081"      
+      
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8889:8080
+    depends_on: 
+      - pg-master
+      - pg-slave
+
+  migrate:
+    image: migrate:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-migration
+    command: ["/bin/bash -c", "/bin/wait-for-it.sh --host=pg-master --port=5432 --timeout=600"]
+    command: ["/bin/bash", "-c", "/bin/migrate -database postgres://postgres:postgres@pg-master:5432/postgres?sslmode=disable -path /migration/scripts up"]
+    volumes:
+      - ./migration/scripts:/migration/scripts
+    depends_on:
+      - pg-master
+
+volumes:
+  postgresql:
+  postgresql_data:  
