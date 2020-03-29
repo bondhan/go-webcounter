@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"errors"
 	"regexp"
 	"sync"
 
@@ -20,14 +19,9 @@ func ValidateModels(mod interface{}) error {
 	return err
 }
 
-func ValidateSlug(slug string) error {
-	once.Do(func() {
-		correctSlug = regexp.MustCompile(`^[a-z-]+$`)
-	})
-
-	if !correctSlug.MatchString(slug) {
-		return errors.New("slug must be lower case letters with - (dash) only")
+// PanicErr ...
+func PanicErr(err error) {
+	if err != nil {
+		panic(err)
 	}
-
-	return nil
 }

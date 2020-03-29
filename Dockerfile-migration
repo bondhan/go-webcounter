@@ -16,8 +16,7 @@ RUN apk add --no-cache --virtual .build-deps --no-progress -q curl \
 
 FROM alpine
 
-RUN mkdir /migration
-RUN mkdir /migration/scripts
+RUN mkdir -p /migration/scripts
 
 RUN apk add --no-cache --virtual .build-deps --no-progress -q bash
 RUN apk update && apk add --no-cache coreutils

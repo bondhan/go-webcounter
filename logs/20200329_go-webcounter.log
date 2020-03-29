@@ -1,0 +1,44 @@
+{"level":"info","msg":"manager was called","time":"29 Mar 20 20:32 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 20:32 WIB"}
+{"level":"info","msg":"manager was called","time":"29 Mar 20 21:06 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 21:06 WIB"}
+{"level":"info","msg":"manager was called","time":"29 Mar 20 21:13 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 21:13 WIB"}
+{"level":"info","msg":"manager was called","time":"29 Mar 20 21:14 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 21:14 WIB"}
+{"level":"info","msg":"manager was called","time":"29 Mar 20 21:15 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 21:15 WIB"}
+{"level":"info","msg":"manager was called","time":"29 Mar 20 21:38 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 21:55 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 21:56 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:01 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:01 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:01 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:02 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:03 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:03 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:03 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:05 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:06 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:09 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:11 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:21 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:24 WIB"}
+{"level":"error","msg":"dial tcp 127.0.0.1:7432: connect: connection refused","time":"29 Mar 20 22:24 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:33 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:35 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:37 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:40 WIB"}
+{"level":"error","msg":"dial tcp 127.0.0.1:7432: connect: connection refused","time":"29 Mar 20 22:40 WIB"}
+{"level":"error","msg":"dial tcp 127.0.0.1:7432: connect: connection refused","time":"29 Mar 20 22:43 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:48 WIB"}
+{"level":"error","msg":"dial tcp 127.0.0.1:7432: connect: connection refused","time":"29 Mar 20 22:48 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:50 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:50 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:51 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:51 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:51 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:53 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 22:55 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 23:09 WIB"}
+{"level":"info","msg":"application started at port:8080","time":"29 Mar 20 23:14 WIB"}

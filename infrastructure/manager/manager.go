@@ -1,44 +1,27 @@
 package manager
 
 import (
-	"sync"
-
-	"github.com/bondhan/godddnews/application"
-	"github.com/bondhan/godddnews/config"
-	"github.com/bondhan/godddnews/infrastructure/persistence"
+	"github.com/bondhan/go-webcounter/application"
+	"github.com/bondhan/go-webcounter/config"
+	"github.com/bondhan/go-webcounter/infrastructure/persistence"
+	"github.com/bondhan/go-webcounter/interfaces/handlers"
+	"github.com/bondhan/go-webcounter/internal/utils"
 	"go.uber.org/dig"
 )
 
 // Manager ...
 type Manager struct {
-	container *dig.Container
+	Container *dig.Container
 }
 
-var (
-	singleton *Manager
-	once      sync.Once
-)
-
-// BuildContainer ...
-func buildContainer() *dig.Container {
+// New ...
+func New() *Manager {
 	container := dig.New()
-	container.Provide(config.NewDbConfig)
-	container.Provide(application.NewNewsApp)
-	container.Provide(application.NewTopicApp)
-	container.Provide(application.NewTagApp)
-	container.Provide(persistence.NewTopicRepository)
-	container.Provide(persistence.NewTagRepository)
-	container.Provide(persistence.NewNewsRepository)
+	utils.PanicErr(container.Provide(config.NewDbConfig))
+	utils.PanicErr(container.Provide(persistence.NewVisitorRepository))
+	utils.PanicErr(container.Provide(application.NewVisitorApp))
+	utils.PanicErr(container.Provide(handlers.NewCommonHandler))
+	utils.PanicErr(container.Provide(handlers.NewVisitorHandler))
 
-	return container
-}
-
-// GetContainer ...
-func GetContainer() *dig.Container {
-	once.Do(func() {
-
-		singleton = &Manager{buildContainer()}
-	})
-
-	return singleton.container
+	return &Manager{Container: container}
 }
