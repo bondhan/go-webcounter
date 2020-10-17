@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/adjust/redismq"
 	"github.com/bondhan/go-webcounter/infrastructure/config"
 	"github.com/bondhan/go-webcounter/infrastructure/utils/redisclient"
 	"github.com/bondhan/go-webcounter/interfaces/handlers"
@@ -10,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -43,13 +45,65 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(time.Duration(90 * time.Second)))
 
-	_, err := redisclient.PingRedis(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_EXPIRED_SECONDS"), os.Getenv("REDIS_PASSWORD"))
+	redisC, err := redisclient.PingRedis(os.Getenv("REDIS_HOST")+":"+os.Getenv("REDIS_PORT"), os.Getenv("REDIS_EXPIRED_SECONDS"), os.Getenv("REDIS_PASSWORD"))
 	if err != nil {
 		logrus.Fatalf("Fail connecting to redisclient error:%s", err)
 	}
 
 	visitorRepo := persistence.NewVisitorRepository(dbWebCounter)
-	visitorApp := application.NewVisitorApp(visitorRepo)
+
+	// get last counte from DB
+	lastVisitor,err := visitorRepo.GetVisitor()
+	if err != nil {
+		logrus.Fatalf("Fail get last visitor %f", err)
+	}
+
+	// convert to string as we store in redis
+	lastVisitorCounterStr := strconv.FormatUint(lastVisitor.Counter, 10)
+	// create new redis key
+	redisclient.CreateNewKey("counter",lastVisitorCounterStr,-1)
+
+	// Create Redis Queue and consumer
+	RedisVisitorQueue := redismq.CreateBufferedQueue(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), 0, os.Getenv("QUEUE_NAME"), 1000)
+	RedisVisitorQueue.Start()
+
+	RedisVisitorConsumer, err := RedisVisitorQueue.AddConsumer("RedisVisitorConsumer")
+	if err != nil {
+		logrus.Fatalf("Error creating redis consumer %s", err)
+	}
+
+	//flush buffer when exit
+	defer RedisVisitorQueue.FlushBuffer()
+
+	RedisVisitorConsumer.ResetWorking()
+	go func() {
+		for true {
+			counter, err := RedisVisitorConsumer.Get()
+			if err != nil {
+				logrus.Fatalf("Error in consuming redis queue %s", err)
+			}
+
+			logrus.Debugf("Consume %s", counter.Payload)
+
+			err = counter.Ack()
+			if err != nil {
+				logrus.Fatalf("Error in consuming redis queue %s", err)
+			}
+
+			number, err := strconv.ParseUint(counter.Payload, 10, 64)
+			if err != nil {
+				logrus.Fatalf("Error converting to uint %s", err)
+			}
+
+			err = visitorRepo.IncrementVisitor(number)
+			if err != nil {
+				logrus.Fatalf("Error in insert DB %s", err)
+			}
+
+		}
+	}()
+
+	visitorApp := application.NewVisitorApp(visitorRepo, RedisVisitorQueue, redisC)
 	visitorHandler := handlers.NewVisitorHandler(visitorApp)
 
 	r.Mount("/web-counter", handlers.RouteVisitor(visitorHandler))

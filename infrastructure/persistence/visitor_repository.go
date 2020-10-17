@@ -20,6 +20,17 @@ func NewVisitorRepository(dbs config.DBStorage) repository.VisitorRepository {
 	}
 }
 
+func (v *visitorRepository) IncrementVisitor(counter uint64)  error {
+
+	visitor:= domain.Visitor{
+		Counter: counter,
+	}
+	err := v.dbWrite.Create(&visitor).Error
+
+	return err
+}
+
+
 func (v *visitorRepository) GetVisitor() (domain.Visitor, error) {
 
 	var visitor domain.Visitor
@@ -28,7 +39,7 @@ func (v *visitorRepository) GetVisitor() (domain.Visitor, error) {
 	return visitor, err
 }
 
-func (v *visitorRepository) IncrementVisitorAndDeleteOlderVisitor() (domain.Visitor, error) {
+func (v *visitorRepository) IncrementVisitorNoParam() (domain.Visitor, error) {
 
 	var OldVisitor, NewVisitor domain.Visitor
 
@@ -49,12 +60,6 @@ func (v *visitorRepository) IncrementVisitorAndDeleteOlderVisitor() (domain.Visi
 	NewVisitor.Counter = OldVisitor.Counter+1
 
 	err = tx.Create(&NewVisitor).Error
-	if err != nil {
-		tx.Rollback()
-		return NewVisitor, tx.Error
-	}
-
-	err=tx.Delete(&OldVisitor).Error
 	if err != nil {
 		tx.Rollback()
 		return NewVisitor, tx.Error

@@ -18,7 +18,7 @@ var (
 // Visitor ...
 type Visitor struct {
 	gorm.Model
-	Counter uint `gorm:"column:counter" json:"counter"`
+	Counter uint64 `gorm:"column:counter" json:"counter"`
 }
 
 // TableName sets the insert table name for this struct type

@@ -7,6 +7,7 @@ import (
 
 	"github.com/bondhan/go-webcounter/application"
 	"github.com/bondhan/go-webcounter/interfaces/respond"
+
 )
 
 // RouteVisitor ...
@@ -34,6 +35,7 @@ type VisitorHandler interface {
 
 // NewVisitorHandler ..
 func NewVisitorHandler(visitorApp application.VisitorApp) VisitorHandler {
+
 	return &visitorHandler{
 		visitorApp: visitorApp,
 	}
@@ -46,7 +48,13 @@ func (h *visitorHandler) GetLastCounter(w http.ResponseWriter, r *http.Request) 
 
 func (h *visitorHandler) IncrementCounter(w http.ResponseWriter, r *http.Request) {
 
-	respond.JSON(w, http.StatusOK, nil)
+	counter, err := h.visitorApp.IncrementCounter()
+	if err != nil {
+		respond.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	respond.JSON(w, http.StatusOK, counter)
 }
 
 func (h *visitorHandler) GetLastCounterDB(w http.ResponseWriter, r *http.Request) {
