@@ -1,6 +1,6 @@
 # Go-WebCounter
 
-A try web counter handling million requests (on going)
+A web counter 'trying' to handle 'million' requests (on going)
 
 ## Design
 
