@@ -8,6 +8,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
 	"strconv"
+	"sync"
 )
 
 // VisitorApp ...
@@ -21,6 +22,10 @@ type visitorApp struct {
 	visitorQueue *redismq.BufferedQueue
 	redisClient  *redis.Client
 }
+
+var (
+	mutex sync.Mutex
+)
 
 // NewVisitorApp ...
 func NewVisitorApp(visitorRepo repository.VisitorRepository, visitorQueue *redismq.BufferedQueue, redisClient *redis.Client) VisitorApp {
@@ -36,6 +41,7 @@ func (va *visitorApp) IncrementCounter() (string, error) {
 	var err error
 	var number uint64
 
+	mutex.Lock()
 	content, ok := redisclient.GetContentByKey("counter")
 	if !ok {
 		// get last counte from DB
@@ -70,6 +76,7 @@ func (va *visitorApp) IncrementCounter() (string, error) {
 	}
 
 	err = va.visitorQueue.Put(numberStr)
+	mutex.Unlock()
 
 	return numberStr, err
 }

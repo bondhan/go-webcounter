@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/adjust/redismq"
+	"github.com/bondhan/go-webcounter/domain/repository"
 	"github.com/bondhan/go-webcounter/infrastructure/config"
 	"github.com/bondhan/go-webcounter/infrastructure/utils/redisclient"
 	"github.com/bondhan/go-webcounter/interfaces/handlers"
@@ -12,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"sync"
 	"syscall"
 	"time"
 
@@ -63,8 +65,10 @@ func main() {
 	// create new redis key
 	redisclient.CreateNewKey("counter",lastVisitorCounterStr,-1)
 
+	defer redisclient.DeleteKeys("counter")
+
 	// Create Redis Queue and consumer
-	RedisVisitorQueue := redismq.CreateBufferedQueue(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), 0, os.Getenv("QUEUE_NAME"), 1000)
+	RedisVisitorQueue := redismq.CreateBufferedQueue(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"), os.Getenv("REDIS_PASSWORD"), 0, os.Getenv("QUEUE_NAME"), 10000)
 	RedisVisitorQueue.Start()
 
 	RedisVisitorConsumer, err := RedisVisitorQueue.AddConsumer("RedisVisitorConsumer")
@@ -76,32 +80,11 @@ func main() {
 	defer RedisVisitorQueue.FlushBuffer()
 
 	RedisVisitorConsumer.ResetWorking()
-	go func() {
-		for true {
-			counter, err := RedisVisitorConsumer.Get()
-			if err != nil {
-				logrus.Fatalf("Error in consuming redis queue %s", err)
-			}
 
-			logrus.Debugf("Consume %s", counter.Payload)
-
-			err = counter.Ack()
-			if err != nil {
-				logrus.Fatalf("Error in consuming redis queue %s", err)
-			}
-
-			number, err := strconv.ParseUint(counter.Payload, 10, 64)
-			if err != nil {
-				logrus.Fatalf("Error converting to uint %s", err)
-			}
-
-			err = visitorRepo.IncrementVisitor(number)
-			if err != nil {
-				logrus.Fatalf("Error in insert DB %s", err)
-			}
-
-		}
-	}()
+	go ConsumeQueue(RedisVisitorConsumer, visitorRepo)
+	go ConsumeQueue(RedisVisitorConsumer, visitorRepo)
+	go ConsumeQueue(RedisVisitorConsumer, visitorRepo)
+	go ConsumeQueue(RedisVisitorConsumer, visitorRepo)
 
 	visitorApp := application.NewVisitorApp(visitorRepo, RedisVisitorQueue, redisC)
 	visitorHandler := handlers.NewVisitorHandler(visitorApp)
@@ -128,5 +111,36 @@ func main() {
 	logrus.Warn("shutting down http server")
 	if err := server.Shutdown(ctx); err != nil {
 		logrus.Error(err)
+	}
+}
+
+var mutex sync.Mutex
+
+func ConsumeQueue(RedisVisitorConsumer *redismq.Consumer, visitorRepo repository.VisitorRepository) {
+	for true {
+		mutex.Lock()
+		counter, err := RedisVisitorConsumer.Get()
+		if err != nil {
+			logrus.Fatalf("Error in consuming redis queue %s", err)
+		}
+
+		logrus.Debugf("Consume %s", counter.Payload)
+
+		err = counter.Ack()
+		if err != nil {
+			logrus.Fatalf("Error in consuming redis queue %s", err)
+		}
+		mutex.Unlock()
+
+		number, err := strconv.ParseUint(counter.Payload, 10, 64)
+		if err != nil {
+			logrus.Fatalf("Error converting to uint %s", err)
+		}
+
+		err = visitorRepo.IncrementVisitor(number)
+		if err != nil {
+			logrus.Fatalf("Error in insert DB %s", err)
+		}
+
 	}
 }
