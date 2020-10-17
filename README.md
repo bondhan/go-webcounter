@@ -21,7 +21,7 @@ go build  -o bin/web_counter main.go  && ./bin/web_counter
 ### Benchmark
 System: i7 8650 4 cores 8 threads 32 GB RAM 512 GB SSD
 
-10000 total requests with concurrent 100 request at a time:
+10000 total requests with concurrent 1000 request at a time:
 ```bash
 ab -n 10000 -c 1000 http://localhost:8080/web-counter/increment
 ```
