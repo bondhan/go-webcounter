@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"time"
 
 	"github.com/bondhan/go-webcounter/infrastructure/driver"
 	"github.com/jinzhu/gorm"
@@ -26,6 +27,10 @@ func NewDbConfig() DBStorage {
 		os.Exit(-1)
 	}
 
+	dbWrite.DB().SetMaxOpenConns(100)
+	dbWrite.DB().SetMaxIdleConns(50)
+	dbWrite.DB().SetConnMaxLifetime(time.Duration(5) * time.Minute)
+
 	postgreDsnRead := "host=" + os.Getenv("DB_HOST_READ") + " port=" + os.Getenv("DB_PORT_READ") +
 		" user=" + os.Getenv("DB_USER_READ") + " dbname=" + os.Getenv("DB_NAME") +
 		" password=" + os.Getenv("DB_PASSWORD_READ") + " sslmode=" + os.Getenv("DB_SSLMODE_READ")
@@ -35,6 +40,10 @@ func NewDbConfig() DBStorage {
 		logrus.Error(err)
 		os.Exit(-1)
 	}
+
+	dbRead.DB().SetMaxOpenConns(100)
+	dbRead.DB().SetMaxIdleConns(50)
+	dbRead.DB().SetConnMaxLifetime(time.Duration(5) * time.Minute)
 
 	_, isProd := os.LookupEnv("PRODUCTION_ENV")
 	if isProd {

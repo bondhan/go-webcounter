@@ -82,9 +82,6 @@ func main() {
 	RedisVisitorConsumer.ResetWorking()
 
 	go ConsumeQueue(RedisVisitorConsumer, visitorRepo)
-	go ConsumeQueue(RedisVisitorConsumer, visitorRepo)
-	go ConsumeQueue(RedisVisitorConsumer, visitorRepo)
-	go ConsumeQueue(RedisVisitorConsumer, visitorRepo)
 
 	visitorApp := application.NewVisitorApp(visitorRepo, RedisVisitorQueue, redisC)
 	visitorHandler := handlers.NewVisitorHandler(visitorApp)
@@ -117,7 +114,7 @@ func main() {
 var mutex sync.Mutex
 
 func ConsumeQueue(RedisVisitorConsumer *redismq.Consumer, visitorRepo repository.VisitorRepository) {
-	for true {
+	for {
 		mutex.Lock()
 		counter, err := RedisVisitorConsumer.Get()
 		if err != nil {
@@ -132,15 +129,17 @@ func ConsumeQueue(RedisVisitorConsumer *redismq.Consumer, visitorRepo repository
 		}
 		mutex.Unlock()
 
-		number, err := strconv.ParseUint(counter.Payload, 10, 64)
-		if err != nil {
-			logrus.Fatalf("Error converting to uint %s", err)
-		}
+		go func(counterString string) {
+			number, err := strconv.ParseUint(counterString, 10, 64)
+			if err != nil {
+				logrus.Fatalf("Error converting to uint %s", err)
+			}
 
-		err = visitorRepo.IncrementVisitor(number)
-		if err != nil {
-			logrus.Fatalf("Error in insert DB %s", err)
-		}
+			err = visitorRepo.IncrementVisitor(number)
+			if err != nil {
+				logrus.Fatalf("Error in insert DB %s", err)
+			}
+		}(counter.Payload)
 
 	}
 }
