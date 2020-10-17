@@ -1,0 +1,10 @@
+.env
+.idea/
+logs/
+tmp/
+vendor/
+bin/
+.vscode/
+.idea/
+.idea/__debug_bin
+__debug_bin

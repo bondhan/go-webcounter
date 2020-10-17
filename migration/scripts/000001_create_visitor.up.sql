@@ -7,7 +7,8 @@ CREATE TABLE m_visitor (
   updated_at timestamp(0) NULL DEFAULT NULL,
   deleted_at timestamp(0) NULL DEFAULT NULL,
   counter int check (counter >= 0) NOT NULL DEFAULT NEXTVAL ('m_visitor_counter'),  
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  CONSTRAINT m_visitor_counter_unique UNIQUE  (counter)
 );
 
 CREATE INDEX m_visitor_deleted_at ON m_visitor (deleted_at);

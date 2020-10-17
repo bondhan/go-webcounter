@@ -43,9 +43,9 @@ services:
     ports:
       - "6379:6379"
 
-  redis-commander:
-    container_name: redis-commander
-    hostname: redis-commander
+  redisclient-commander-counter:
+    container_name: redisclient-commander-counter
+    hostname: redisclient-commander
     image: rediscommander/redis-commander:latest
     restart: always
     environment:
